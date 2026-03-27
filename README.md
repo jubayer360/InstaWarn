@@ -244,7 +244,7 @@ Seven interactive pages built in **Streamlit + Folium**:
 
 ```bash
 # 1. Setup
-git clone <repo-url> && cd InstaWarn
+git clone https://github.com/jubayer360/InstaWarn && cd InstaWarn
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
