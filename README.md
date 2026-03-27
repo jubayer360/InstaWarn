@@ -2,8 +2,7 @@
 
 > **Automated Impact-Based Multi-Hazard Early Warning & Anticipatory Action Middleware**
 >
-> From forecast issuance to last-mile protective action. Programmatically, reproducibly, in under 30 minutes.
-
+> From forecast issuance to last-mile protective action.
 🚀 **Live Demo:** [https://huggingface.co/spaces/jubayerahmad/InstaWarn](https://huggingface.co/spaces/jubayerahmad/InstaWarn)
 
 ---
