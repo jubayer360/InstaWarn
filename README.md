@@ -9,6 +9,7 @@ From forecast issuance to last-mile protective action: programmatic, reproducibl
 [![Live Prototype](https://img.shields.io/badge/Live_Prototype-HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/spaces/jubayerahmad/InstaWarn)
 [![Repository](https://img.shields.io/badge/Source_Code-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/jubayer360/InstaWarn)
 [![License](https://img.shields.io/badge/License-Open_Source-3DA639?style=for-the-badge)](#data-sources)
+[![Pipeline](https://img.shields.io/badge/Pipeline_Runtime-76s-blue?style=for-the-badge)](#validation-cyclone-mocha-2023-hindcast)
 
 </div>
 
@@ -541,7 +542,7 @@ InstaWarn/
 
 ```bash
 # Clone and set up environment
-git clone https://github.com/jubayer-ahmad/InstaWarn.git && cd InstaWarn
+git clone https://github.com/jubayer360/InstaWarn.git && cd InstaWarn
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
@@ -588,11 +589,11 @@ What it demonstrates: that the translation layer, from national forecast to comm
 
 <div align="center">
 
-| Member | Institution |
-|:---|:---|
-| [**Jubayer Ahmad**](https://www.linkedin.com/in/ahmadjubayer/) | IBA, University of Rajshahi |
-| [**Abir Dey**](https://www.linkedin.com/in/abir-dey-798073210/) | IBA, University of Rajshahi |
-| [**Md. Ashik Miah**](https://www.linkedin.com/in/ibaiteashik/) | IBA, University of Rajshahi |
+| Member | Role | Institution |
+|:---|:---|:---|
+| [**Jubayer Ahmad**](https://www.linkedin.com/in/ahmadjubayer/) | Solution architect, system design, and simulator MVP deployment | IBA, University of Rajshahi |
+| [**Abir Dey**](https://www.linkedin.com/in/abir-dey-798073210/) | Researcher | IBA, University of Rajshahi |
+| [**Md. Ashik Miah**](https://www.linkedin.com/in/ibaiteashik/) | Visualizer | IBA, University of Rajshahi |
 
 📧 **Contact:** jubayerahmad.c@gmail.com · +8801797799424
 
