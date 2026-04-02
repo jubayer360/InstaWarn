@@ -95,24 +95,14 @@ InstaWarn is **middleware**: a seven-module automated pipeline that sits between
 
 ### Alignment with Mapathon 2026 Challenge Tracks
 
-```mermaid
-mindmap
-  root((InstaWarn))
-    Track 1: ResilienceAI
-      Map critical infrastructure exposure
-        M1 M2 M3: Spatial hazard footprints<br/>intersected with OSM infrastructure<br/>and WorldPop demographics
-      Identify vulnerable communities
-        Vulnerability Index: poverty,<br/>shelter deficit, child ratio,<br/>population density, connectivity
-      Automated risk assessment pipelines
-        Entire pipeline is deterministic code<br/>Open data, one-command execution<br/>Git-versioned, fully reproducible
-    Track 2: Last-Mile
-      Overcome channel constraints
-        M4: Audience-specific Bangla warnings<br/>across SMS, IVR, community radio,<br/>WhatsApp, loudspeaker
-      Coordinate local authorities
-        M7: Decision Dashboard with shared<br/>operational picture for local officials
-      Child-centred anticipatory action
-        M6: School Safety Protocol with phased<br/>school closure and shelter transition
-```
+| Track | Competition Requirement | InstaWarn Response |
+|:---|:---|:---|
+| **Track 1: ResilienceAI** | Map critical infrastructure exposure to multiple hazards | **M1, M2, M3:** Spatial hazard footprints intersected with OSM infrastructure and WorldPop demographics |
+| **Track 1: ResilienceAI** | Identify the most vulnerable communities using spatial data | **Vulnerability Index:** poverty, shelter deficit, child ratio, population density, connectivity, scored per union |
+| **Track 1: ResilienceAI** | Propose automated, reproducible risk assessment pipelines | Entire pipeline is deterministic code. Open data. One-command execution. Git-versioned. Fully reproducible. |
+| **Track 2: Last-Mile** | Overcome channel constraints and localize warnings | **M4:** Audience-specific Bangla warnings across SMS, IVR, community radio, WhatsApp, loudspeaker |
+| **Track 2: Last-Mile** | Coordinate local authorities and community members | **M7:** Decision Dashboard providing a shared operational picture for union chairmen, upazila officers, CPP coordinators |
+| **Track 2: Last-Mile** | Child-centred anticipatory action (funding context) | **M6:** School Safety Protocol with phased school closure and shelter transition state machine |
 
 ---
 
