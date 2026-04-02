@@ -588,7 +588,7 @@ What it demonstrates: that the translation layer, from national forecast to comm
 
 | Member | Role | Institution |
 |:---|:---|:---|
-| [**Jubayer Ahmad**](https://www.linkedin.com/in/ahmadjubayer/) | Solution architect, system design, and simulator MVP deployment | IBA, University of Rajshahi |
+| [**Jubayer Ahmad**](https://www.linkedin.com/in/ahmadjubayer/) | Solution architect and simulator MVP developer | IBA, University of Rajshahi |
 | [**Abir Dey**](https://www.linkedin.com/in/abir-dey-798073210/) | Researcher | IBA, University of Rajshahi |
 | [**Md. Ashik Miah**](https://www.linkedin.com/in/ibaiteashik/) | Visualizer | IBA, University of Rajshahi |
 
