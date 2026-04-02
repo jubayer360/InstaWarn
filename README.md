@@ -313,24 +313,41 @@ Hindcasting (retrospective application of a system to a historical event using e
 ### Warning Dissemination Timeline: Observed vs. InstaWarn
 
 ```mermaid
-gantt
-    title Warning Dissemination Latency Comparison
-    dateFormat HH:mm
-    axisFormat %H:%M
+flowchart LR
+    subgraph OBS["Mocha 2023 (Observed Latency)"]
+        direction LR
+        O1["T-48h<br/>BMD Signal 10"]
+        O2["T-43h<br/>District Office<br/><b>+5h delay</b>"]
+        O3["T-40h<br/>Upazila Activation<br/><b>+8h delay</b>"]
+        O4["T-34h<br/>Loudspeaker<br/><b>+14h delay</b>"]
+        O5["T-6h<br/>Chars Reached<br/><b>+42h delay</b>"]
+        O6["Never<br/>School Closure"]
+        O1 --> O2 --> O3 --> O4 --> O5 --> O6
+    end
 
-    section Mocha 2023 (Observed)
-    BMD Signal 10 Issued         :milestone, m1, 00:00, 0min
-    District Office Notified     :crit, obs1, 05:00, 0min
-    Upazila Activation Begins    :crit, obs2, 08:00, 0min
-    First Community Loudspeaker  :crit, obs3, 14:00, 0min
-    Chars and Islands Reached    :crit, obs4, 42:00, 0min
-    School Closure Notification  :crit, obs5, after obs4, 0min
+    subgraph IW["InstaWarn (Hindcast)"]
+        direction LR
+        I1["T-48h<br/>BMD Signal 10<br/>Ingested"]
+        I2["T-48h<br/>All Channels<br/><b>Instant</b>"]
+        I3["T-48h<br/>School Protocol<br/><b>Instant</b>"]
+        I4["T-48h<br/>Chars Reached<br/><b>Instant</b>"]
+        I1 --> I2
+        I1 --> I3
+        I1 --> I4
+    end
 
-    section InstaWarn (Hindcast)
-    BMD Signal 10 Ingested       :milestone, m2, 00:00, 0min
-    All Channels Activated       :active, iw1, 00:00, 1min
-    School Protocol Initiated    :active, iw2, 00:00, 1min
-    Chars Reached via Radio/CPP  :active, iw3, 00:00, 1min
+    style OBS fill:#1a1a2e,stroke:#e94560,stroke-width:2px,color:#eee
+    style IW fill:#1a1a2e,stroke:#00b4d8,stroke-width:2px,color:#eee
+    style O1 fill:#16213e,stroke:#e94560,color:#eee
+    style O2 fill:#16213e,stroke:#e94560,color:#eee
+    style O3 fill:#16213e,stroke:#e94560,color:#eee
+    style O4 fill:#16213e,stroke:#e94560,color:#eee
+    style O5 fill:#16213e,stroke:#e94560,color:#eee
+    style O6 fill:#4a0000,stroke:#e94560,color:#eee,stroke-width:2px
+    style I1 fill:#16213e,stroke:#00b4d8,color:#eee
+    style I2 fill:#0a3d2a,stroke:#00b4d8,color:#eee
+    style I3 fill:#0a3d2a,stroke:#00b4d8,color:#eee
+    style I4 fill:#0a3d2a,stroke:#00b4d8,color:#eee
 ```
 
 | Milestone | Mocha 2023 (Observed) | InstaWarn (Hindcast) | Latency Reduction |
