@@ -2,243 +2,500 @@
 
 **Automated Impact-Based Multi-Hazard Early Warning Middleware for Bangladesh**
 
-From forecast issuance to last-mile protective action — programmatically, reproducibly, on open data.
-
-**Live Prototype:** [huggingface.co/spaces/jubayerahmad/InstaWarn](https://huggingface.co/spaces/jubayerahmad/InstaWarn)
-
-**Repository:** [github.com/jubayer360/InstaWarn](https://github.com/jubayer360/InstaWarn)
-
----
+From forecast issuance to last-mile protective action: programmatic, reproducible, and built entirely on open data.
 
 <div align="center">
-  <h2>🏆 Mapathon 2026 - 2nd Runner Up!</h2>
-  <img src="https://lh3.googleusercontent.com/d/1Zp5rbvmQf0vqwZ0at85XrtHBdBPgQBYF" alt="Mapathon 2026 Prize" width="80%">
-  <br><br>
-  <b>We outperformed strong competitors from 29 universities to secure a spot among the top 11 finalist teams, and walked away as the 2nd Runner-up. That's something to be proud of. 🏆</b>
-  <p><i>Every other finalist team came from an engineering or technical background. We were the only team with a BBA background!</i></p>
+
+[![Live Prototype](https://img.shields.io/badge/Live_Prototype-HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/spaces/jubayerahmad/InstaWarn)
+[![Repository](https://img.shields.io/badge/Source_Code-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/jubayer-ahmad/InstaWarn)
+[![License](https://img.shields.io/badge/License-Open_Source-3DA639?style=for-the-badge)](#data-sources)
+[![Pipeline](https://img.shields.io/badge/Pipeline_Runtime-76s-blue?style=for-the-badge)](#validation-cyclone-mocha-2023-hindcast)
+
 </div>
 
 ---
 
-## The Problem InstaWarn Addresses
+<div align="center">
+  <h2>🏆 Mapathon 2026 — 2nd Runner-Up</h2>
+  <img src="https://lh3.googleusercontent.com/d/1Zp5rbvmQf0vqwZ0at85XrtHBdBPgQBYF" alt="Mapathon 2026 Prize" width="80%">
+  <br><br>
+  <b>Selected among the top 11 finalist teams from 29 competing universities. The only team from a business administration discipline among exclusively engineering and computer science finalists.</b>
+</div>
 
-Bangladesh's national early warning infrastructure — BMD, FFWC, the Cyclone Preparedness Programme — is among the most mature in South Asia. InstaWarn does not replace any of it.
+---
+
+## Table of Contents
+
+- [Problem Statement](#problem-statement)
+- [System Overview](#system-overview)
+- [System Architecture](#system-architecture)
+- [Module Specifications](#module-specifications)
+- [Validation: Cyclone Mocha 2023 Hindcast](#validation-cyclone-mocha-2023-hindcast)
+- [The School-Shelter Paradox](#the-school-shelter-paradox)
+- [Channel Routing for Isolated Communities](#channel-routing-for-isolated-communities)
+- [Data Limitations and Operational Honesty](#data-limitations-and-operational-honesty)
+- [Technical Stack](#technical-stack)
+- [Project Structure](#project-structure)
+- [Quick Start](#quick-start)
+- [Data Sources](#data-sources)
+- [Scope and Constraints](#scope-and-constraints)
+- [Team InstaWarn](#team-instawarn)
+
+---
+
+## Problem Statement
+
+Bangladesh's national early warning infrastructure (BMD, FFWC, Cyclone Preparedness Programme) is among the most mature in South Asia. InstaWarn does not replace any of it.
 
 It addresses a specific, persistent, and documented gap: **the translation layer between a national-level forecast and a community-level protective action.**
 
-This gap has five structural failure points, each documented in post-disaster evaluations and humanitarian after-action reviews:
+This gap manifests across five structural failure points, each documented in post-disaster evaluations and humanitarian after-action reviews:
 
-| Failure Point | What Happens | Consequence |
-|:---|:---|:---|
-| **Time Decay** | BMD Signal 10 travels through a 6-tier bureaucratic relay (BMD → DDM → Division → District → Upazila → Union → Community). Each node adds delay. | During Cyclone Mocha (May 2023), communities in southern Cox's Bazar received actionable information 14+ hours after BMD's initial Signal 10. |
-| **Language Mismatch** | Warnings use meteorological terminology (knots, hectopascals, signal numbers). Generic advisories ("stay alert") carry no location-specific intelligence. | A fisherman and a headteacher receive the same message, though their protective actions differ entirely. |
-| **Channel Blindness** | Warnings are disseminated through a uniform channel mix regardless of local connectivity. | Chars and islands with no mobile coverage, no electricity, and seasonal road cuts receive the same SMS-centric approach as Dhaka. |
-| **Impact Opacity** | Warnings describe the hazard ("a cyclone is coming"), not the impact ("your school will flood, your nearest shelter is 24,000 people over capacity"). | Local decision-makers lack data to justify early, costly anticipatory actions like school closure or shelter pre-positioning. |
-| **No Child Protocol** | No standardized, automated protocol exists for school-level anticipatory action. School-as-cyclone-shelter dual use creates an unresolved operational paradox. | School closure decisions are ad hoc. Children are either sent home too late or schools close unnecessarily, eroding trust. |
+```mermaid
+flowchart LR
+    subgraph FAILURE["Structural Failure Points in Warning Dissemination"]
+        direction TB
+        F1["⏱ <b>Temporal Decay</b><br/>6-tier bureaucratic relay<br/>adds 14+ hours of latency"]
+        F2["🔤 <b>Semantic Mismatch</b><br/>Meteorological terminology<br/>without localized context"]
+        F3["📡 <b>Channel Homogeneity</b><br/>Uniform channel mix ignores<br/>connectivity heterogeneity"]
+        F4["🔍 <b>Impact Opacity</b><br/>Hazard description without<br/>consequence quantification"]
+        F5["🏫 <b>No Child Protocol</b><br/>No automated school-level<br/>anticipatory action logic"]
+    end
+
+    F1 --> F2 --> F3 --> F4 --> F5
+
+    style FAILURE fill:#1a1a2e,stroke:#e94560,stroke-width:2px,color:#eee
+    style F1 fill:#16213e,stroke:#e94560,color:#eee
+    style F2 fill:#16213e,stroke:#e94560,color:#eee
+    style F3 fill:#16213e,stroke:#e94560,color:#eee
+    style F4 fill:#16213e,stroke:#e94560,color:#eee
+    style F5 fill:#16213e,stroke:#e94560,color:#eee
+```
+
+<details>
+<summary><b>Expand: Detailed Failure Point Analysis</b></summary>
+
+| # | Failure Point | Observed Behavior | Operational Consequence |
+|:-:|:---|:---|:---|
+| 1 | **Temporal Decay** | BMD Signal 10 traverses a 6-tier bureaucratic relay (BMD → DDM → Division → District → Upazila → Union → Community). Each node introduces latency. | During Cyclone Mocha (May 2023), communities in southern Cox's Bazar received actionable information 14+ hours after BMD's initial Signal 10 issuance. |
+| 2 | **Semantic Mismatch** | Warnings employ meteorological nomenclature (knots, hectopascals, signal numbers). Generic advisories ("stay alert") carry no location-specific intelligence. | A subsistence fisherman and a school headteacher receive identical messages, though their required protective actions differ fundamentally. |
+| 3 | **Channel Homogeneity** | Warnings are disseminated through a uniform channel mix regardless of local telecommunication infrastructure. | Chars and islands with no mobile coverage, intermittent electricity, and seasonal road severance receive the same SMS-dependent approach as Dhaka. |
+| 4 | **Impact Opacity** | Warnings describe the hazard ("a cyclone is approaching"), not the projected impact ("your school will flood; your nearest shelter is 24,000 persons over capacity"). | Local decision-makers lack quantified evidence to justify early, costly anticipatory actions such as school closure or shelter pre-positioning. |
+| 5 | **No Child Protocol** | No standardized, automated protocol exists for school-level anticipatory action. School-as-shelter dual use creates an unresolved operational paradox. | School closure decisions are ad hoc. Children are either dismissed too late or schools close unnecessarily, eroding institutional trust. |
+
+</details>
 
 **Sources:** IFRC Cyclone Mocha DREF Final Report (MDRBD030), WMO Impact-Based Forecast and Warning Services framework, ReliefWeb situation updates, BTRC/ITU connectivity data.
 
 ---
 
-## What InstaWarn Is
+## System Overview
 
-InstaWarn is middleware — a seven-module automated pipeline that sits between the national meteorological forecast and the community-level protective action. It converts a BMD/FFWC advisory into hyperlocal, audience-specific, channel-routed warning messages in Bangla, with a dedicated child-safety protocol.
+InstaWarn is **middleware**: a seven-module automated pipeline that sits between the national meteorological forecast and the community-level protective action. It ingests a BMD/FFWC advisory and produces hyperlocal, audience-specific, channel-routed warning messages in Bangla, with a dedicated child-safety protocol.
 
-It addresses both challenge tracks of the Mapathon 2026:
+### Alignment with Mapathon 2026 Challenge Tracks
 
-| Track | Competition Requirement | InstaWarn Module |
-|:---|:---|:---|
-| **Track 1: ResilienceAI** | Map critical infrastructure exposure to multiple hazards | M1-M3: Spatial hazard footprints intersected with OSM infrastructure and WorldPop demographics, scored using UNDRR composite risk formula |
-| **Track 1: ResilienceAI** | Identify the most vulnerable communities using spatial data | Vulnerability Index: poverty, shelter deficit, child ratio, population density, connectivity — scored per union |
-| **Track 1: ResilienceAI** | Propose automated, reproducible risk assessment pipelines | Entire pipeline is code. Open data. One-command execution. Git-versioned. |
-| **Track 2: Last-Mile** | Overcome channel constraints, localize warnings | M4: Audience-specific Bangla warnings across SMS, IVR, community radio, WhatsApp, loudspeaker |
-| **Track 2: Last-Mile** | Coordinate local authorities and community members | M7: Decision Dashboard — shared operational picture for union chairmen, upazila officers, CPP coordinators |
-| **Track 2: Last-Mile** | Child-centred anticipatory action (funding context) | M6: School Safety Protocol — phased school closure → shelter transition state machine |
+```mermaid
+mindmap
+  root((InstaWarn))
+    Track 1: ResilienceAI
+      Map critical infrastructure exposure
+        M1 M2 M3: Spatial hazard footprints<br/>intersected with OSM infrastructure<br/>and WorldPop demographics
+      Identify vulnerable communities
+        Vulnerability Index: poverty,<br/>shelter deficit, child ratio,<br/>population density, connectivity
+      Automated risk assessment pipelines
+        Entire pipeline is deterministic code<br/>Open data, one-command execution<br/>Git-versioned, fully reproducible
+    Track 2: Last-Mile
+      Overcome channel constraints
+        M4: Audience-specific Bangla warnings<br/>across SMS, IVR, community radio,<br/>WhatsApp, loudspeaker
+      Coordinate local authorities
+        M7: Decision Dashboard with shared<br/>operational picture for local officials
+      Child-centred anticipatory action
+        M6: School Safety Protocol with phased<br/>school closure and shelter transition
+```
 
 ---
 
 ## System Architecture
 
-### Data Flow: Forecast to Action
+### End-to-End Data Flow: Forecast to Protective Action
 
+```mermaid
+flowchart TD
+    Forecast["<b>BMD / FFWC Forecast</b><br/><i>National meteorological advisory</i>"]
+
+    subgraph SPATIAL["Spatial Analysis Layer"]
+        direction TB
+        M1["<b>M1: Hazard Engine</b><br/>Cyclone · Flood · Landslide<br/>─────────────────<br/>IBTrACS track + SRTM DEM →<br/>union-level severity zonation<br/><i>Output: impact_zone.geojson</i><br/>(EXTREME / HIGH / MODERATE / LOW)"]
+        M2["<b>M2: Exposure Engine</b><br/>Infrastructure · Population<br/>─────────────────<br/>OSM Overpass API + WorldPop 100m + BBS/DDM<br/>Spatial join: assets and populations<br/>within each hazard polygon<br/><i>Output: impact_profiles.json</i>"]
+        M3["<b>M3: Risk Scoring</b><br/>UNDRR Composite Formula<br/>─────────────────<br/>R = H(severity) × E(density) × V(socioeconomic)<br/>Prioritized union list with<br/>four-tier composite classification"]
+    end
+
+    subgraph ACTION["Action Layer"]
+        direction TB
+        M4["<b>M4: Warning Generator</b><br/><i>Gemini 1.5-Flash</i><br/>7 audiences × 5 channels<br/>= 35 Bangla warning variants"]
+        M5["<b>M5: NLP Triage</b><br/><i>Bidirectional</i><br/>Inbound crisis text parsing<br/>+ fuzzy geocoding"]
+        M6["<b>M6: School Safety Protocol</b><br/><i>Phased State Machine</i><br/>Closure → Transition →<br/>Shelter Activation"]
+    end
+
+    M7["<b>M7: Decision Dashboard</b><br/><i>Operational Interface</i><br/>Streamlit + Folium · 7 interactive pages<br/>Situation map, disaster replay, warning journey,<br/>impact intelligence, AI warning gen, school monitor"]
+
+    Forecast --> M1
+    M1 --> M2
+    M2 --> M3
+    M3 --> M4
+    M3 --> M5
+    M3 --> M6
+    M4 --> M7
+    M5 --> M7
+    M6 --> M7
+
+    style Forecast fill:#0d1b2a,stroke:#00b4d8,stroke-width:2px,color:#e0e0e0
+    style SPATIAL fill:#1b263b,stroke:#00b4d8,stroke-width:1px,color:#e0e0e0
+    style ACTION fill:#1b263b,stroke:#48cae4,stroke-width:1px,color:#e0e0e0
+    style M7 fill:#0d1b2a,stroke:#90e0ef,stroke-width:2px,color:#e0e0e0
 ```
-BMD / FFWC Forecast
-        │
-        ▼
-┌─────────────────────────┐
-│  M1: Hazard Engine       │  IBTrACS track + SRTM DEM → union-level severity zones
-│  Cyclone · Flood · Land. │  Output: impact_zone.geojson (EXTREME/HIGH/MODERATE/LOW)
-└───────────┬─────────────┘
-            ▼
-┌─────────────────────────┐
-│  M2: Exposure Engine     │  OSM Overpass API + WorldPop 100m + BBS/DDM
-│  Infrastructure · Pop.   │  Spatial join: what and who is inside each hazard zone
-└───────────┬─────────────┘
-            ▼
-┌─────────────────────────┐
-│  M3: Risk Scoring        │  R = H(severity) × E(density) × V(socioeconomic index)
-│  UNDRR Composite         │  Output: prioritized union list with composite scores
-└───────────┬─────────────┘
-            │
-     ┌──────┼──────────────┐
-     ▼      ▼              ▼
-┌────────┐ ┌────────┐ ┌────────┐
-│ M4:    │ │ M5:    │ │ M6:    │
-│ Warning│ │ NLP    │ │ School │
-│ Gen.   │ │ Triage │ │ Safety │
-│(Gemini)│ │(2-way) │ │Protocol│
-└───┬────┘ └───┬────┘ └───┬────┘
-    └──────────┼──────────┘
-               ▼
-┌─────────────────────────┐
-│  M7: Decision Dashboard  │  Streamlit + Folium — 7 interactive pages
-│  (Operational Interface) │  Situation map, disaster replay, warning journey,
-│                          │  impact intelligence, AI warning gen, school monitor
-└─────────────────────────┘
+
+### Logical Decomposition
+
+```mermaid
+block-beta
+    columns 7
+    block:header:7
+        columns 7
+        H["InstaWarn: Seven-Module Pipeline"]
+    end
+    M1["M1\nHazard\nEngine"]:1
+    M2["M2\nExposure\nEngine"]:1
+    M3["M3\nRisk\nScoring"]:1
+    M4["M4\nWarning\nGenerator"]:1
+    M5["M5\nNLP\nTriage"]:1
+    M6["M6\nSchool\nProtocol"]:1
+    M7["M7\nDashboard"]:1
+
+    style header fill:#0d1b2a,stroke:#00b4d8,color:#e0e0e0
+    style M1 fill:#16213e,stroke:#e94560,color:#eee
+    style M2 fill:#16213e,stroke:#f0a500,color:#eee
+    style M3 fill:#16213e,stroke:#00b4d8,color:#eee
+    style M4 fill:#16213e,stroke:#48cae4,color:#eee
+    style M5 fill:#16213e,stroke:#90e0ef,color:#eee
+    style M6 fill:#16213e,stroke:#a8dadc,color:#eee
+    style M7 fill:#16213e,stroke:#caf0f8,color:#eee
 ```
 
-### Module Detail
+---
 
-| Module | Method | Key Tools | Output |
-|:---|:---|:---|:---|
-| **M1: Hazard Engine** | Cyclone: elliptical wind-radius + storm surge decay against coastal DEM. Flood: gauge-based threshold against DEM. Landslide: slope × rainfall intensity. | GeoPandas, rasterio, Shapely | `impact_zone_{timestep}.geojson` — union polygons classified by severity |
-| **M2: Exposure Engine** | Automated `sjoin()` of hazard polygons with OSM infrastructure (schools, hospitals, shelters, roads) and WorldPop population grid via `zonal_stats()` | GeoPandas, rasterstats, Overpass API | `impact_profiles.json` — per-union infrastructure counts, population, shelter capacity |
-| **M3: Risk Scoring** | `R = H(severity, time_decay) × E(infrastructure_density, shelter_gap) × V(poverty, child_ratio, connectivity)` | NumPy, Pandas | Ranked union list with four-tier classification |
-| **M4: Warning Generator** | Gemini 1.5-Flash under strict system prompts. Receives structured impact data, produces audience-specific Bangla messages. | google-generativeai | 7 audiences × 5 channels = 35 warning variants per union |
-| **M5: NLP Triage** | Inbound crisis texts parsed into Pydantic schema (incident type, urgency, headcount, resource). Location fuzzy-matched via Levenshtein distance against OSM dataset. | thefuzz, Gemini (ETL parser only) | Live structured incident GeoJSON overlay |
-| **M6: School Protocol** | Phased state machine: T-48h alert → T-36h parent notification → closure confirmation → shelter transition (12h buffer) → capacity tracking → overflow redirect | Custom state logic | School status feed + shelter availability tracker |
-| **M7: Dashboard** | Seven Streamlit pages: Situation Map, Disaster Replay, Warning Journey, Impact Intelligence, AI Warning Generator, School Monitor, Multi-Hazard Proof | Streamlit, Folium, streamlit-folium | Operational decision interface |
+## Module Specifications
+
+### M1: Hazard Engine
+
+| Attribute | Detail |
+|:---|:---|
+| **Purpose** | Generate union-level hazard severity polygons from meteorological forecast data |
+| **Cyclone Model** | Elliptical wind-radius decay model applied against coastal DEM; storm surge inundation depth estimated via SRTM 30m elevation thresholds |
+| **Flood Model** | Gauge-based river stage exceedance mapped against DEM-derived floodplain delineation |
+| **Landslide Model** | Slope gradient (derived from SRTM) weighted by antecedent rainfall intensity |
+| **Toolchain** | GeoPandas, rasterio, Shapely |
+| **Output** | `impact_zone_{timestep}.geojson` with union polygons classified into four severity tiers |
+
+### M2: Exposure Engine
+
+| Attribute | Detail |
+|:---|:---|
+| **Purpose** | Quantify infrastructure assets and population within each hazard polygon |
+| **Method** | Automated `sjoin()` of hazard polygons with OSM infrastructure layers (schools, hospitals, shelters, roads) and WorldPop 100m population raster via `zonal_stats()` |
+| **Toolchain** | GeoPandas, rasterstats, Overpass API |
+| **Output** | `impact_profiles.json` with per-union infrastructure counts, population totals, and shelter capacity figures |
+
+### M3: Risk Scoring
+
+| Attribute | Detail |
+|:---|:---|
+| **Purpose** | Compute composite risk scores per union using the UNDRR framework |
+| **Formula** | `R = H(severity, temporal_decay) × E(infrastructure_density, shelter_gap) × V(poverty_index, child_ratio, connectivity_score)` |
+| **Toolchain** | NumPy, Pandas |
+| **Output** | Ranked union list with four-tier classification (EXTREME, HIGH, MODERATE, LOW) |
+
+### M4: Warning Generator
+
+| Attribute | Detail |
+|:---|:---|
+| **Purpose** | Produce localized, audience-specific warning messages in Bangla |
+| **Method** | Gemini 1.5-Flash under constrained system prompts; receives structured impact data, returns natural-language Bangla messages |
+| **Audience Matrix** | 7 audiences (fishermen, farmers, headteachers, parents, CPP volunteers, local officials, general public) × 5 channels (SMS, IVR, community radio, WhatsApp, loudspeaker) = **35 warning variants per union** |
+| **Toolchain** | google-generativeai |
+
+### M5: NLP Triage
+
+| Attribute | Detail |
+|:---|:---|
+| **Purpose** | Parse inbound crisis reports into structured incident records with geolocation |
+| **Method** | Inbound text parsed into Pydantic schema (incident type, urgency level, headcount, resource requirement); location resolved via Levenshtein distance fuzzy matching against the OSM gazetteer |
+| **Toolchain** | thefuzz, Gemini (ETL parser only) |
+| **Output** | Live structured incident GeoJSON overlay on the decision dashboard |
+
+### M6: School Safety Protocol
+
+| Attribute | Detail |
+|:---|:---|
+| **Purpose** | Manage the phased transition of school buildings from educational use to emergency shelter function |
+| **Method** | Deterministic finite state machine with time-gated transitions (see [State Machine Diagram](#the-school-shelter-paradox)) |
+| **Output** | Real-time school status feed + shelter availability tracker with overflow redirection |
+
+### M7: Decision Dashboard
+
+| Attribute | Detail |
+|:---|:---|
+| **Purpose** | Provide a shared operational picture for local decision-makers |
+| **Pages** | Situation Map · Disaster Replay · Warning Journey · Impact Intelligence · AI Warning Generator · School Monitor · Multi-Hazard Proof |
+| **Toolchain** | Streamlit, Folium, streamlit-folium |
 
 ---
 
 ## Why Programmatic Pipelines, Not Desktop GIS
 
-InstaWarn performs the same spatial operations as ArcGIS or QGIS — spatial joins, zonal statistics, buffer analysis, raster-vector intersection — but executes them through `GeoPandas`, `Shapely`, `rasterio`, and `rasterstats` in code.
+InstaWarn performs the same spatial operations as ArcGIS or QGIS (spatial joins, zonal statistics, buffer analysis, raster-vector intersection) but executes them through `GeoPandas`, `Shapely`, `rasterio`, and `rasterstats` in code.
 
-| Dimension | Desktop GIS | InstaWarn Pipeline |
+```mermaid
+quadrantChart
+    title Operational Comparison: Desktop GIS vs. Programmatic Pipeline
+    x-axis "Low Reproducibility" --> "High Reproducibility"
+    y-axis "Low Throughput" --> "High Throughput"
+    quadrant-1 "Optimal: InstaWarn"
+    quadrant-2 "Fast but fragile"
+    quadrant-3 "Manual and slow"
+    quadrant-4 "Reproducible but slow"
+    "Desktop GIS (manual)": [0.2, 0.15]
+    "Semi-automated GIS": [0.45, 0.4]
+    "InstaWarn Pipeline": [0.88, 0.85]
+    "Script-based (no framework)": [0.7, 0.55]
+```
+
+| Dimension | Desktop GIS Workflow | InstaWarn Pipeline |
 |:---|:---|:---|
-| **Reproducibility** | Analyst-dependent click sequences, not versioned | Deterministic code; identical input → identical output |
-| **Speed** | Hours per event (manual layer loading, styling, export) | 76 seconds end-to-end |
-| **Scalability** | One district at a time | Swap config for any district, any hazard type |
-| **Output** | A map | Maps + warnings + school protocols + triage feeds |
-| **Auditability** | Project file on one machine | Open-source Git repo; anyone can clone and verify |
+| **Reproducibility** | Analyst-dependent click sequences; not version-controlled | Deterministic code; identical input produces identical output |
+| **Throughput** | Hours per event (manual layer loading, styling, export) | 76 seconds end-to-end |
+| **Scalability** | One district at a time | Configuration-driven; substitute district or hazard type via parameter |
+| **Output Scope** | Static maps | Maps + localized warnings + school protocols + triage feeds |
+| **Auditability** | Project file on one workstation | Open-source Git repository; any party can clone, inspect, and verify |
 
-For anticipatory action with a 48-72 hour warning window, automation is not optional.
+For anticipatory action within a 48 to 72 hour warning window, automated processing is not optional: it is a prerequisite.
 
 ---
 
 ## Validation: Cyclone Mocha 2023 Hindcast
 
-Hindcasting — retrospective application of a system to a historical event using real data — is the standard validation method for early warning systems (WMO, ECMWF). InstaWarn replays Cyclone Mocha (May 12-14, 2023) using real datasets to demonstrate: given this input, these outputs are produced deterministically.
+Hindcasting (retrospective application of a system to a historical event using empirical data) is the standard validation methodology for early warning systems, endorsed by both WMO and ECMWF. InstaWarn replays Cyclone Mocha (May 12-14, 2023) using real datasets to demonstrate that, given this input, these outputs are produced deterministically.
 
 ### Data Inputs
 
-| Input | Source | Resolution | License |
+| Input | Source | Spatiotemporal Resolution | License |
 |:---|:---|:---|:---|
-| Cyclone track & intensity | IBTrACS (NCEI, NOAA) | 6-hourly positions | Public Domain |
+| Cyclone track and intensity | IBTrACS (NCEI, NOAA) | 6-hourly positions | Public Domain |
 | Administrative boundaries | geoBoundaries via HDX | ADM4 (Union) | ODC-ODbL |
 | Infrastructure | OpenStreetMap via Overpass API | Individual features | ODbL |
 | Population density | WorldPop Constrained 2020 | 100m grid | CC-BY 4.0 |
 | Elevation | NASA SRTM V003 | 30m (1 arc-second) | Public Domain |
 
-**What is simulated:** The timing of system actions (InstaWarn did not exist during Mocha). The spatial analysis uses real geospatial data; the pipeline proves what outputs it would have generated.
+> **Note:** The temporal sequencing of system actions is simulated (InstaWarn did not exist during Mocha). The spatial analysis operates on real geospatial data; the pipeline demonstrates what outputs it would have generated given the same meteorological inputs.
 
 ### Hindcast Results at T-48h
 
 | Metric | Value |
 |:---|:---|
 | Unions classified HIGH/EXTREME | 32 (Coastal Cox's Bazar) |
-| Population in impact zone | 638,692 |
+| Population within impact zone | 638,692 |
 | Schools triggered for closure protocol | 84 |
 | Shelters activated | 38 standard + 9 dual-purpose school-shelters |
 | Warning variants generated | 35 (7 audiences × 5 channels) |
 | Pipeline execution time | 76 seconds |
 
-### Warning Dissemination: Status Quo vs. InstaWarn
+### Warning Dissemination Timeline: Observed vs. InstaWarn
 
-| Milestone | Mocha 2023 (Observed) | InstaWarn (Hindcast) |
-|:---|:---|:---|
-| BMD Signal 10 issued | T-48h | T-48h (same input) |
-| District office notified | T-43h (~5h delay) | T-48h (instant) |
-| Upazila activation begins | T-40h (~8h delay) | T-48h (instant) |
-| First community loudspeaker | T-34h (~14h delay) | T-48h (instant) |
-| School closure notification | Never (ad hoc) | T-48h (automated) |
-| Chars and islands reached | T-6h or never | T-48h (radio + CPP routing) |
+```mermaid
+gantt
+    title Warning Dissemination Latency Comparison
+    dateFormat HH:mm
+    axisFormat %H:%M
 
----
+    section Mocha 2023 (Observed)
+    BMD Signal 10 Issued         :milestone, m1, 00:00, 0min
+    District Office Notified     :crit, obs1, 05:00, 0min
+    Upazila Activation Begins    :crit, obs2, 08:00, 0min
+    First Community Loudspeaker  :crit, obs3, 14:00, 0min
+    Chars and Islands Reached    :crit, obs4, 42:00, 0min
+    School Closure Notification  :crit, obs5, after obs4, 0min
 
-## Data Limitations and Operational Honesty
+    section InstaWarn (Hindcast)
+    BMD Signal 10 Ingested       :milestone, m2, 00:00, 0min
+    All Channels Activated       :active, iw1, 00:00, 1min
+    School Protocol Initiated    :active, iw2, 00:00, 1min
+    Chars Reached via Radio/CPP  :active, iw3, 00:00, 1min
+```
 
-InstaWarn's prototype uses the best available open data. It does not claim this data is complete. This section documents known gaps — because exposing where data breaks is itself operationally valuable.
-
-### Known Data Gaps
-
-| Data Layer | Issue | How InstaWarn Handles It | What Full Deployment Requires |
+| Milestone | Mocha 2023 (Observed) | InstaWarn (Hindcast) | Latency Reduction |
 |:---|:---|:---|:---|
-| **OSM Infrastructure** | Incomplete at union level. Roads may be missing or misaligned. Shelter records are sparse — some unions show 1-2 shelters where dozens exist. | Pipeline uses what OSM provides and flags unions with abnormally low infrastructure counts as "data-deficient." | Ground-truthed infrastructure registry, maintained through existing disaster committee structures (ministry → union → community). Accuracy validation against satellite imagery (GEE). |
-| **Shelter Capacity** | DDM shelter inventory is not fully digitized or publicly accessible. Many shelters lack recorded capacity figures. | Where capacity is unknown, the system applies a default estimate (800 per shelter) and flags it. Demand-supply analysis runs on available data with explicit uncertainty markers. | Digitized, web-accessible DDM shelter database with verified capacities. Community-level data enrichment in high-risk zones. |
-| **Connectivity Profiles** | Union-level mobile coverage, smartphone penetration, and community radio presence are approximated from BTRC aggregate data and OpenCelliD tower locations, not measured per-union. | Channel routing uses best available proxies. The routing logic is sound; the input precision is limited. | BTRC/operator-level union coverage maps. Field survey of communication channel availability per union. |
-| **Population Dynamics** | WorldPop provides residential population. It does not capture seasonal labor migration (fishermen moving to coast), displaced populations, or institutional populations. | Static population count used. No dynamic adjustment. | Integration with UNHCR/IOM displacement data for areas with refugee populations. Seasonal migration models for coastal livelihoods. |
-
-**This is not a weakness to hide. Any system that claims to work at union level must confront these gaps.** InstaWarn's architecture is designed so that when better data becomes available — from LGED, DDM, field surveys, or community mapping initiatives — it plugs directly into the existing pipeline without architectural changes. The modules consume structured inputs; improve the input, and the output improves automatically.
+| BMD Signal 10 issued | T-48h | T-48h (same input) | Baseline |
+| District office notified | T-43h (~5h delay) | T-48h (instantaneous) | 5 hours |
+| Upazila activation begins | T-40h (~8h delay) | T-48h (instantaneous) | 8 hours |
+| First community loudspeaker | T-34h (~14h delay) | T-48h (instantaneous) | 14 hours |
+| School closure notification | Never (ad hoc) | T-48h (automated) | ∞ → 0 |
+| Chars and islands reached | T-6h or never | T-48h (radio + CPP routing) | 42+ hours |
 
 ---
 
 ## The School-Shelter Paradox
 
-Bangladesh has approximately 4,000 designated cyclone shelters. A significant portion are school buildings designed for dual use. This creates a direct operational conflict:
+Bangladesh has approximately 4,000 designated cyclone shelters. A significant proportion are school buildings designed for dual use. This creates a direct operational conflict:
 
-- The school must **close** to send children home safely (requires maximum lead time)
-- The school must **open** as a shelter to receive evacuees (requires quick activation)
+- The school must **close** to dismiss children safely (requires maximum lead time)
+- The school must **open** as a shelter to receive evacuees (requires rapid activation)
 
-No existing system manages this transition. InstaWarn's Module 6 implements a phased state machine:
+No existing system manages this transition programmatically. Module 6 implements a **deterministic finite state machine** with time-gated phase transitions:
 
-```
-T-48h  ─── Headteacher receives SMS alert (school in HIGH/EXTREME zone)
-T-36h  ─── Parent bulk SMS: school closure + child pickup instructions
-T-24h  ─── Closure confirmation check
-             ├── Confirmed → proceed to shelter transition
-             └── Overdue → escalate to Upazila Nirbahi Officer
-T-24h  ─── Dual-use school: shelter transition timer starts
-T-12h  ─── Shelter active, accepting evacuees
-             Capacity tracked; overflow redirected to nearest alternative
+```mermaid
+stateDiagram-v2
+    [*] --> NORMAL
+
+    NORMAL --> ALERT : BMD advisory received<br/>School in HIGH/EXTREME zone
+    ALERT --> PARENT_NOTIFY : T-36h<br/>Bulk SMS to parents<br/>with pickup instructions
+    PARENT_NOTIFY --> CLOSURE_CHECK : T-24h<br/>Closure confirmation<br/>window opens
+
+    state CLOSURE_CHECK {
+        [*] --> PENDING
+        PENDING --> CONFIRMED : Headteacher confirms
+        PENDING --> ESCALATED : Overdue → UNO notified
+        ESCALATED --> CONFIRMED : UNO confirms
+    }
+
+    CLOSURE_CHECK --> SHELTER_TRANSITION : Closure confirmed<br/>12-hour buffer begins
+
+    SHELTER_TRANSITION --> SHELTER_ACTIVE : T-12h<br/>Shelter accepting evacuees
+
+    state SHELTER_ACTIVE {
+        [*] --> ACCEPTING
+        ACCEPTING --> CAPACITY_REACHED : Occupancy = Capacity
+        CAPACITY_REACHED --> OVERFLOW_REDIRECT : Redirect to nearest<br/>alternative shelter
+    }
+
+    SHELTER_ACTIVE --> STAND_DOWN : All-clear issued
+    STAND_DOWN --> NORMAL : Facility restored<br/>to educational use
+
+    note right of ALERT
+        SMS sent to headteacher
+        with school-specific
+        hazard exposure data
+    end note
+
+    note right of SHELTER_ACTIVE
+        Real-time occupancy
+        tracking with overflow
+        redirection logic
+    end note
 ```
 
 This protocol directly serves the competition's funding context: the GFFO Child-Centred Anticipatory Action project, implemented by Save the Children.
 
 ---
 
-## Reaching Isolated Communities
+## Channel Routing for Isolated Communities
 
-Expert practitioners rightly ask: how does InstaWarn reach communities that are truly isolated — not just underserved, but physically separated, with a mobile phone as the only possible medium?
+Expert practitioners rightly ask: how does InstaWarn reach communities that are truly isolated, not merely underserved, but physically separated, with structural telecommunication deficits?
 
-InstaWarn's answer is the **Channel Routing Engine** (embedded in M4), which assigns the optimal dissemination channel per union based on connectivity profile:
+InstaWarn's answer is the **Channel Routing Engine** (embedded in M4), which assigns the optimal dissemination channel per union based on that union's connectivity profile:
 
-| Connectivity Profile | Channel Assignment |
-|:---|:---|
-| 4G + smartphone penetration >50% | SMS + WhatsApp (with map attachment) |
-| 2G coverage, feature phones dominant | IVR voice call (pre-recorded Bangla, 30s) |
-| No reliable mobile coverage | Community radio script + CPP volunteer loudspeaker route |
-| Char/island, seasonal road cut | Community radio (pre-positioned battery radio program) + CPP walking route |
+```mermaid
+flowchart LR
+    INPUT["Union Connectivity<br/>Profile Assessment"]
 
-The routing logic is functional in the prototype. The precision of the connectivity input data is the constraint — and that is documented honestly above.
+    INPUT --> C1{"4G coverage +<br/>smartphone<br/>penetration > 50%?"}
+    INPUT --> C2{"2G coverage +<br/>feature phones<br/>dominant?"}
+    INPUT --> C3{"No reliable<br/>mobile<br/>coverage?"}
+    INPUT --> C4{"Char / island +<br/>seasonal road<br/>severance?"}
 
-For truly isolated communities, the critical infrastructure is not the phone. It is the **CPP volunteer network** (60,000+ volunteers operating in coastal Bangladesh) and **community radio stations**. InstaWarn generates content formatted for these channels: 20-second loudspeaker scripts and 60-second radio announcements, in natural Bangla, with location-specific shelter directions.
+    C1 -->|Yes| CH1["📱 SMS + WhatsApp<br/>(with map attachment)"]
+    C2 -->|Yes| CH2["📞 IVR Voice Call<br/>(pre-recorded Bangla, 30s)"]
+    C3 -->|Yes| CH3["📻 Community Radio<br/>+ CPP Volunteer<br/>Loudspeaker Route"]
+    C4 -->|Yes| CH4["📻 Community Radio<br/>(battery-powered receivers)<br/>+ CPP Walking Route"]
+
+    style INPUT fill:#0d1b2a,stroke:#00b4d8,color:#e0e0e0
+    style CH1 fill:#16213e,stroke:#48cae4,color:#eee
+    style CH2 fill:#16213e,stroke:#48cae4,color:#eee
+    style CH3 fill:#16213e,stroke:#48cae4,color:#eee
+    style CH4 fill:#16213e,stroke:#48cae4,color:#eee
+```
+
+The routing logic is fully functional in the prototype. The precision of the connectivity input data remains the constraint, and that limitation is documented transparently in the section below.
+
+For truly isolated communities, the critical infrastructure is not the mobile handset. It is the **CPP volunteer network** (60,000+ volunteers operating across coastal Bangladesh) and **community radio stations**. InstaWarn generates content formatted for these channels: 20-second loudspeaker scripts and 60-second radio announcements, in natural Bangla, with location-specific shelter directions.
+
+---
+
+## Data Limitations and Operational Honesty
+
+InstaWarn's prototype uses the best available open data. It does not claim this data is complete. This section documents known gaps, because exposing where data quality degrades is itself operationally valuable for any system intended for field deployment.
+
+<details>
+<summary><b>Expand: Known Data Gaps and Mitigation Strategies</b></summary>
+
+| Data Layer | Known Gap | Current Mitigation | Requirement for Full Deployment |
+|:---|:---|:---|:---|
+| **OSM Infrastructure** | Incomplete at union level. Road segments may be absent or geometrically misaligned. Shelter records are sparse in rural unions. | Pipeline consumes available OSM data and flags unions with anomalously low infrastructure counts as "data-deficient." | Ground-truthed infrastructure registry maintained through existing disaster management committee structures. Accuracy validation against satellite imagery (Google Earth Engine). |
+| **Shelter Capacity** | DDM shelter inventory is neither fully digitized nor publicly accessible. Many shelters lack recorded capacity figures. | Where capacity is unknown, the system applies a conservative default estimate (800 persons per shelter) and flags the assumption. Demand-supply analysis operates on available data with explicit uncertainty markers. | Digitized, web-accessible DDM shelter database with field-verified capacities. Community-level data enrichment in high-risk zones. |
+| **Connectivity Profiles** | Union-level mobile coverage, smartphone penetration, and community radio presence are approximated from BTRC aggregate statistics and OpenCelliD tower geolocation, not measured per union. | Channel routing uses best available proxy indicators. The routing logic is architecturally sound; the input precision is limited. | BTRC/operator-level union coverage maps. Field survey of communication channel availability per union. |
+| **Population Dynamics** | WorldPop provides static residential population estimates. It does not account for seasonal labor migration (e.g., fishermen relocating to the coast), displaced populations, or institutional populations. | Static population count used. No temporal adjustment. | Integration with UNHCR/IOM displacement datasets for areas with refugee populations. Seasonal migration models for coastal livelihoods. |
+
+</details>
+
+> **This is not a weakness to conceal. Any system that claims to operate at union-level granularity must confront these data quality gaps.** InstaWarn's architecture is designed so that when higher-fidelity data becomes available (from LGED, DDM, field surveys, or community mapping initiatives) it integrates directly into the existing pipeline without architectural modification. The modules consume structured inputs; improve the input fidelity, and the output quality improves proportionally.
 
 ---
 
 ## Technical Stack
 
-| Component | Tool | Role |
-|:---|:---|:---|
-| Geospatial Engine | GeoPandas, Shapely, Fiona, PyProj | Spatial joins, overlay, projection |
-| Raster Analysis | rasterio, rasterstats | DEM ingestion, zonal statistics |
-| Visualization | Folium, streamlit-folium, Matplotlib | Interactive web maps + static exports |
-| Dashboard | Streamlit | Multipage web application |
-| AI / NLP | google-generativeai (Gemini 1.5-Flash) | Warning localization + inbound triage parsing |
-| Fuzzy Matching | thefuzz | Levenshtein distance for location reconciliation |
+```mermaid
+flowchart TB
+    subgraph GEO["Geospatial Engine"]
+        G1[GeoPandas]
+        G2[Shapely]
+        G3[Fiona]
+        G4[PyProj]
+    end
 
-Built entirely on free, open-source tools. Deployable for under $200/year (Gemini API costs for warning generation). No proprietary GIS licenses required.
+    subgraph RASTER["Raster Analysis"]
+        R1[rasterio]
+        R2[rasterstats]
+    end
+
+    subgraph VIZ["Visualization"]
+        V1[Folium]
+        V2[streamlit-folium]
+        V3[Matplotlib]
+    end
+
+    subgraph APP["Application"]
+        A1[Streamlit]
+    end
+
+    subgraph AI["AI / NLP"]
+        AI1["Gemini 1.5-Flash<br/>(google-generativeai)"]
+        AI2["thefuzz<br/>(Levenshtein distance)"]
+    end
+
+    GEO --> RASTER
+    GEO --> VIZ
+    RASTER --> VIZ
+    AI --> APP
+    VIZ --> APP
+
+    style GEO fill:#16213e,stroke:#00b4d8,color:#eee
+    style RASTER fill:#16213e,stroke:#48cae4,color:#eee
+    style VIZ fill:#16213e,stroke:#90e0ef,color:#eee
+    style APP fill:#0d1b2a,stroke:#caf0f8,stroke-width:2px,color:#eee
+    style AI fill:#16213e,stroke:#e94560,color:#eee
+```
+
+Built entirely on free, open-source tooling. Deployable at a total cost under $200/year (Gemini API costs for warning generation). No proprietary GIS licenses required.
 
 ---
 
@@ -260,7 +517,7 @@ InstaWarn/
 │   ├── impact_scoring/          ← Composite risk calculator (H × E × V)
 │   ├── warning_generator/       ← Gemini-powered Bangla message generation
 │   ├── inbound_triage/          ← NLP parsing, fuzzy geocoding
-│   ├── school_protocol/         ← School closure / shelter transition
+│   ├── school_protocol/         ← School closure / shelter transition FSM
 │   └── dashboard/pages/         ← 7 Streamlit dashboard pages
 ├── data/
 │   ├── raw/                     ← Source files (not committed; see Data Sources)
@@ -277,53 +534,70 @@ InstaWarn/
 ## Quick Start
 
 ```bash
+# Clone and set up environment
 git clone https://github.com/jubayer-ahmad/InstaWarn.git && cd InstaWarn
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
+# Configure API access
 echo 'GEMINI_API_KEY = "your_key"' > .streamlit/secrets.toml
 
-python run_pipeline.py --event mocha_2023    # Full pipeline: 76 seconds
-streamlit run app.py                          # Launch dashboard
+# Execute full pipeline (76 seconds)
+python run_pipeline.py --event mocha_2023
+
+# Launch decision dashboard
+streamlit run app.py
 ```
 
 ---
 
 ## Data Sources
 
-| Dataset | Source | Resolution | License |
+| Dataset | Source | Spatiotemporal Resolution | License |
 |:---|:---|:---|:---|
 | Administrative Boundaries | HDX geoBoundaries | ADM4 (Union) | ODC-ODbL |
 | Infrastructure | OpenStreetMap via Overpass API | Individual features | ODbL |
 | Population Density | WorldPop Constrained 2020 | 100m grid | CC-BY 4.0 |
-| Elevation (DEM) | NASA SRTM V003 | 30m | Public Domain |
-| Cyclone Track | IBTrACS (NCEI, NOAA) | 6-hourly | Public Domain |
+| Elevation (DEM) | NASA SRTM V003 | 30m (1 arc-second) | Public Domain |
+| Cyclone Track | IBTrACS (NCEI, NOAA) | 6-hourly positions | Public Domain |
 | Socioeconomic Indicators | BBS / World Bank | District / Upazila | Open Data |
-| Shelter Capacities | DDM / HDX | Individual facilities | — |
+| Shelter Capacities | DDM / HDX | Individual facilities | Government |
 
 ---
 
-## What InstaWarn Is Not
+## Scope and Constraints
 
-- It is not a replacement for BMD, FFWC, DDM, or the Cyclone Preparedness Programme.
-- It is not a finished product. It is a functional prototype validated on one historical event.
-- It does not claim complete data. It documents where data is missing and what better data would enable.
-- It does not generate forecasts. It consumes forecasts and translates them into actionable, localized intelligence.
+InstaWarn is explicitly bounded in scope:
 
-What it demonstrates: that the translation layer — from national forecast to community action — can be automated, reproduced, and operated on open data at a cost any district office can sustain.
+- It **does not replace** BMD, FFWC, DDM, or the Cyclone Preparedness Programme.
+- It **is not a finished product**. It is a functional prototype validated on one historical event (Cyclone Mocha 2023).
+- It **does not claim data completeness**. It documents where data is absent and specifies what higher-fidelity data would enable.
+- It **does not generate forecasts**. It consumes forecasts and translates them into actionable, localized protective intelligence.
+
+What it demonstrates: that the translation layer, from national forecast to community protective action, can be automated, reproduced, and operated on open data at a cost any district office can sustain.
 
 ---
 
-### Team InstaWarn
+## Team InstaWarn
+
+<div align="center">
 
 | Member | Institution |
 |:---|:---|
-| [Jubayer Ahmad](https://www.linkedin.com/in/ahmadjubayer/) | IBA, University of Rajshahi |
-| [Abir Dey](https://www.linkedin.com/in/abir-dey-798073210/) | IBA, University of Rajshahi |
-| [Md. Ashik Miah](https://www.linkedin.com/in/ibaiteashik/) | IBA, University of Rajshahi |
+| [**Jubayer Ahmad**](https://www.linkedin.com/in/ahmadjubayer/) | IBA, University of Rajshahi |
+| [**Abir Dey**](https://www.linkedin.com/in/abir-dey-798073210/) | IBA, University of Rajshahi |
+| [**Md. Ashik Miah**](https://www.linkedin.com/in/ibaiteashik/) | IBA, University of Rajshahi |
 
-**Contact:** jubayerahmad.c@gmail.com | +8801797799424
+📧 **Contact:** jubayerahmad.c@gmail.com · +8801797799424
+
+</div>
 
 ---
 
-*Developed for Mapathon 2026, organized by RIMES and Save the Children under the GFFO-funded Child-Centred Anticipatory Action project.*
+<div align="center">
+  <i>Developed for Mapathon 2026, organized by RIMES and Save the Children under the GFFO-funded Child-Centred Anticipatory Action project.</i>
+  <br><br>
+  <img src="https://img.shields.io/badge/Built_with-Open_Data-3DA639?style=flat-square" alt="Open Data">
+  <img src="https://img.shields.io/badge/Built_with-Open_Source-181717?style=flat-square" alt="Open Source">
+  <img src="https://img.shields.io/badge/Validated_on-Cyclone_Mocha_2023-e94560?style=flat-square" alt="Hindcast Validated">
+</div>
