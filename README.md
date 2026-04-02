@@ -7,8 +7,6 @@ From forecast issuance to last-mile protective action: programmatic, reproducibl
 <div align="center">
 
 [![Live Prototype](https://img.shields.io/badge/Live_Prototype-HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/spaces/jubayerahmad/InstaWarn)
-[![Repository](https://img.shields.io/badge/Source_Code-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/jubayer360/InstaWarn)
-[![License](https://img.shields.io/badge/License-Open_Source-3DA639?style=for-the-badge)](#data-sources)
 
 </div>
 
