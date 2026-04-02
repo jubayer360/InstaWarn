@@ -594,7 +594,7 @@ What it demonstrates: that the translation layer, from national forecast to comm
 | [**Abir Dey**](https://www.linkedin.com/in/abir-dey-798073210/) | Researcher | IBA, University of Rajshahi |
 | [**Md. Ashik Miah**](https://www.linkedin.com/in/ibaiteashik/) | Visualizer | IBA, University of Rajshahi |
 
-📧 **Contact:** [EMAIL_ADDRESS]
+📧 **Contact:** jubayerahmad.c@gmail.com
 
 </div>
 
