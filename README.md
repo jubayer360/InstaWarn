@@ -12,9 +12,12 @@ From forecast issuance to last-mile protective action: programmatic, reproducibl
 
 ---
 
-## 🏆 Mapathon 2026 — 2nd Runner-Up
-
-**Selected among the top 11 finalist teams from 29 competing universities. The only team from a business administration discipline among exclusively engineering and computer science finalists.**
+<div align="center">
+  <h2>🏆 Mapathon 2026 — 2nd Runner-Up</h2>
+  <img src="https://lh3.googleusercontent.com/d/1Zp5rbvmQf0vqwZ0at85XrtHBdBPgQBYF" alt="Mapathon 2026 Prize" width="80%">
+  <br><br>
+  <b>Selected among the top 11 finalist teams from 29 competing universities. The only team from a business administration discipline among exclusively engineering and computer science finalists.</b>
+</div>
 
 ---
 
