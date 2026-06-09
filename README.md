@@ -4,7 +4,11 @@
 
 From forecast issuance to last-mile protective action: programmatic, reproducible, and built entirely on open data.
 
-[Live Prototype](https://huggingface.co/spaces/jubayerahmad/InstaWarn)
+<div align="center">
+
+[![Live Prototype](https://img.shields.io/badge/Live_Prototype-HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/spaces/jubayerahmad/InstaWarn)
+
+</div>
 
 ---
 
